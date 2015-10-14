@@ -29,19 +29,24 @@ public class QuizActivity extends AppCompatActivity {
 
     private int mCurrentIndex = 0;
 
-    private void updateQuestion(){
+    private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
     }
 
-    private void checkAnswer(boolean userPressedTrue){
+    private void nextQuestion() {
+        mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+        updateQuestion();
+    }
+
+    private void checkAnswer(boolean userPressedTrue) {
         boolean answerTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
 
         int messageResId = 0;
 
-        if(userPressedTrue == answerTrue){
+        if (userPressedTrue == answerTrue) {
             messageResId = R.string.correct_toast;
-        }else {
+        } else {
             messageResId = R.string.incorrect_toast;
         }
 
@@ -68,6 +73,12 @@ public class QuizActivity extends AppCompatActivity {
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
         updateQuestion();
+        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextQuestion();
+            }
+        });
 
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
@@ -89,8 +100,7 @@ public class QuizActivity extends AppCompatActivity {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                updateQuestion();
+                nextQuestion();
             }
         });
     }
