@@ -17,7 +17,10 @@ public class CheatActivity extends AppCompatActivity {
     public static final String EXTRA_ANSWER_SHOWN =
             "com.s99.geoquiz.answer_shown";
 
+    private static final String KEY_ANSWER_SHOWN = "answer_shown";
+
     private boolean mAnswerIsTrue;
+    private boolean mAnswerWasShown;
 
     private Button mShowAnswer;
     private TextView mAnswerTextView;
@@ -32,6 +35,22 @@ public class CheatActivity extends AppCompatActivity {
         return result.getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
     }
 
+    private void setAnswerShownResult(boolean isAnswerShown){
+        mAnswerWasShown = true;
+        Intent data = new Intent();
+        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+        setResult(Activity.RESULT_OK, data);
+    }
+
+    private void setAnswerTextView(){
+        if (mAnswerIsTrue) {
+            mAnswerTextView.setText(R.string.true_button);
+        } else {
+            mAnswerTextView.setText(R.string.false_button);
+        }
+        setAnswerShownResult(true);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,26 +60,27 @@ public class CheatActivity extends AppCompatActivity {
 
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
 
+        mAnswerTextView = (TextView) findViewById(R.id.answerTextView);
+
+        if (savedInstanceState != null) {
+            mAnswerWasShown = savedInstanceState.getBoolean(KEY_ANSWER_SHOWN);
+            if (mAnswerWasShown) {
+                setAnswerTextView();
+            }
+        }
+
         mShowAnswer = (Button) findViewById(R.id.showAnswerButton);
         mShowAnswer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAnswerIsTrue){
-                    mAnswerTextView.setText(R.string.true_button);
-                }else {
-                    mAnswerTextView.setText(R.string.false_button);
-                }
-                setAnswerShownResult(true);
+                setAnswerTextView();
             }
         });
-
-        mAnswerTextView = (TextView) findViewById(R.id.answerTextView);
     }
 
-    private void setAnswerShownResult(boolean isAnswerShown){
-        Intent data = new Intent();
-        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
-        setResult(Activity.RESULT_OK, data);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_ANSWER_SHOWN, mAnswerWasShown);
     }
-
 }
