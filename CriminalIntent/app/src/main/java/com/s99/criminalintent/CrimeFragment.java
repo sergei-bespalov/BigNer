@@ -5,7 +5,9 @@ import android.app.UiAutomation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -26,6 +28,8 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
 
     private static final String ARG_CRIME_ID = "crime_id";
+    private static final String DIALOG_DATE = "DialogDate";
+
     public static final String EXTRA_CHANGED_CRIME_ID
             = "com.s99.criminalintent.changed_crime_id";
 
@@ -74,7 +78,14 @@ public class CrimeFragment extends Fragment {
         mDateButton = (Button) v.findViewById(R.id.crime_date);
         CharSequence date = DateFormat.format("EEEE, MMM d, yyyy", mCrime.getDate());
         mDateButton.setText(date);
-        mDateButton.setEnabled(false);
+        mDateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getFragmentManager();
+                DatePickerFragment dialog = new DatePickerFragment();
+                dialog.show(fragmentManager, DIALOG_DATE);
+            }
+        });
 
         mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());
