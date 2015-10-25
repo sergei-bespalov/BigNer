@@ -38,19 +38,20 @@ public class CrimeListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //updateUI(); -inefficient
+        updateUI(); //-inefficient
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) return;
 
+        /*//TODO need to adapting for CrimePagerActivity
         if (requestCode == REQUEST_CODE_CRIME) {
-            UUID crimeId = CrimeActivity.getChangedCrimeId(data);
+            UUID crimeId = CrimePagerActivity.getChangedCrimeId(data);
             Crime crime = CrimeLab.get(getActivity()).getCrime(crimeId);
             int crimePosition = mCrimeAdapter.getCrimePosition(crime);
             mCrimeAdapter.notifyItemChanged(crimePosition);
-        }
+        }*/
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -97,8 +98,9 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
-            startActivityForResult(intent, REQUEST_CODE_CRIME);
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
+            //startActivityForResult(intent, REQUEST_CODE_CRIME);
+            startActivity(intent);
         }
     }
 
