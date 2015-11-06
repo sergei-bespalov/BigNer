@@ -7,4 +7,14 @@
     <string name="crime_solved_label">Solved</string>
     <string name="date_picker_title">Date of Crime:</string>
     <string name="time_of_crime">Time of Crime:</string>
+    <string name="new_crime">New Crime</string>
+    <string name="show_subtitle">Show Subtitle</string>
+    <string name="hide_subtitle">Hide Subtitle</string>
+    <string name="subtitle_format">%1$s crimes</string>
+    <string name="remove_crime">Remove Crime</string>
+    <string name="no_crimes">There are no crimes</string>
+    <plurals name="subtitle_plural">
+        <item quantity="one">%1$s crime</item>
+        <item quantity="other">%1$s crimes</item>
+    </plurals>
 </resources>
