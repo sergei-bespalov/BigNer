@@ -6,6 +6,8 @@ import java.util.UUID;
 public class Crime {
     private UUID mId;
     private String mTitle;
+    private String mSuspect;
+    private String mSuspectsPhone;
     private Date mDate;
     private boolean mSolved;
 
@@ -44,5 +46,21 @@ public class Crime {
 
     public void setTitle(String title) {
         mTitle = title;
+    }
+
+    public String getSuspect() {
+        return mSuspect;
+    }
+
+    public void setSuspect(String suspect) {
+        mSuspect = suspect;
+    }
+
+    public String getSuspectsPhone() {
+        return mSuspectsPhone;
+    }
+
+    public void setSuspectsPhone(String suspectsPhone) {
+        mSuspectsPhone = suspectsPhone;
     }
 }
