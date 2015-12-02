@@ -73,6 +73,8 @@ public class FlickrFetchr {
         } catch (JSONException je) {
             Log.e(TAG, "Failed to parse JSON", je);
         }
+
+        return items;
     }
 
     private void parseItems(List<GalleryItem> items, JSONObject jsonBody)
@@ -84,7 +86,7 @@ public class FlickrFetchr {
             JSONObject photoJsonObject = photosJsonArray.getJSONObject(i);
 
             GalleryItem item = new GalleryItem();
-            item.setId(photosJsonObject.getString("id"));
+            item.setId(photoJsonObject.getString("id"));
             item.setCaption(photoJsonObject.getString("title"));
 
             if (!photoJsonObject.has("url_s")){
