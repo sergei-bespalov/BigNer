@@ -114,6 +114,12 @@ public class PhotoGalleryFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mThumbnailDownloader.clearQueue();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         mThumbnailDownloader.quit();
@@ -192,6 +198,20 @@ public class PhotoGalleryFragment extends Fragment {
             Drawable placeholder = getResources().getDrawable(R.drawable.bill_up_close);
             photoHolder.bindDrawable(placeholder);
             mThumbnailDownloader.queueThumbnail(photoHolder, galleryItem.getUrl());
+
+            int preloadedPosition = position;
+            while (preloadedPosition >= 0 && preloadedPosition > position - 10){
+                galleryItem = mGalleryItems.get(preloadedPosition);
+                mThumbnailDownloader.queueThumbnail(null, galleryItem.getUrl());
+                preloadedPosition--;
+            }
+
+            preloadedPosition = position;
+            while (preloadedPosition < getItemCount() & preloadedPosition < position + 10){
+                galleryItem = mGalleryItems.get(preloadedPosition);
+                mThumbnailDownloader.queueThumbnail(null, galleryItem.getUrl());
+                preloadedPosition++;
+            }
         }
 
         @Override
