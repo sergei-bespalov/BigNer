@@ -34,7 +34,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
         super(TAG);
         mResponseHandler = responseHandler;
 
-        int cacheSize = 20 * 1024 * 1024;
+        int cacheSize = 50 * 1024 * 1024;
         mCache = new BitmapDownloadingCache(cacheSize);
     }
 
@@ -47,14 +47,21 @@ public class ThumbnailDownloader<T> extends HandlerThread {
                     T target = (T) msg.obj;
                     Log.i(TAG, "Got a request for URL: " + mRequestMap.get(target));
                     handleRequest(target);
-                } else if (msg.what == MESSAGE_PRELOAD){
-                    String url = (String) msg.obj;
-                    try {
-                        downloadBitmapWithCache(url);
-                        Log.i(TAG, "Bitmap preloaded");
-                    } catch (IOException ioe) {
-                        Log.e(TAG, "Error downloading image", ioe);
-                    }
+                } else if (msg.what == MESSAGE_PRELOAD) {
+                    final String url = (String) msg.obj;
+
+                    new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                downloadBitmapWithCache(url);
+                                Log.i(TAG, "Bitmap preloaded");
+                            } catch (IOException ioe) {
+                                Log.e(TAG, "Error downloading image", ioe);
+                            }
+                        }
+                    }.run();
                 }
             }
         };
@@ -65,7 +72,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 
         if (url == null) {
             mRequestMap.remove(target);
-        } else if (target == null){
+        } else if (target == null) {
             mRequestHandler.obtainMessage(MESSAGE_PRELOAD, url)
                     .sendToTarget();
         } else {
