@@ -26,7 +26,7 @@ public class FlickrFetchr {
     private static final String API_KEY = "03301b9a7cfb5dd7ad658b2fe9f9847a";
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
-    private static final Uri ENDPOINT = Uri
+    private static  Uri mEndpoint = Uri
             .parse("https://api.flickr.com/services/rest/")
             .buildUpon()
             .appendQueryParameter("api_key", API_KEY)
@@ -92,8 +92,14 @@ public class FlickrFetchr {
         return items;
     }
 
+    public static void setPage(int pageNumber){
+        mEndpoint = mEndpoint.buildUpon()
+                .appendQueryParameter("page", String.valueOf(pageNumber))
+                .build();
+    }
+
     private String buildUrl(String method, String query){
-        Uri.Builder uriBuilder = ENDPOINT.buildUpon()
+        Uri.Builder uriBuilder = mEndpoint.buildUpon()
                 .appendQueryParameter("method", method);
 
         if (method.equals(SEARCH_METHOD)){
