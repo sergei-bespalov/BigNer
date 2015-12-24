@@ -1,5 +1,6 @@
 package com.s99.photogallery;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -145,6 +146,7 @@ public class PhotoGalleryFragment extends Fragment {
                 Log.d(TAG, "QueryTextSubmit: " + query);
                 QueryPreferences.setStoredQuery(getActivity(), query);
                 resetItems();
+                searchView.onActionViewCollapsed();
                 return true;
             }
 
@@ -202,15 +204,24 @@ public class PhotoGalleryFragment extends Fragment {
     private class FetchItemTask extends AsyncTask<Void, Void, List<GalleryItem>> {
         private String mQuery;
         private int mPage;
+        private ProgressDialog mProgressDialog;
 
         public FetchItemTask(String query, int page){
             mQuery = query;
             mPage = page;
+            mProgressDialog = new ProgressDialog(getActivity());
         }
 
         @Override
         protected void onPreExecute() {
             mFetching = true;
+
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setTitle("Please wait");
+            mProgressDialog.setMessage("is downloading new photo");
+
+            mProgressDialog.show();
         }
 
         @Override
@@ -234,6 +245,8 @@ public class PhotoGalleryFragment extends Fragment {
                 mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
             }
             mFetching = false;
+
+            mProgressDialog.dismiss();
         }
     }
 
