@@ -3,12 +3,15 @@ package com.s99.photogallery;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -26,18 +29,40 @@ public class PollService extends IntentService {
     }
 
     public static void setServiceAlarm(Context context, boolean isOn){
-        Intent i = PollService.newIntent(context);
-        PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
 
-        AlarmManager alarmManager = (AlarmManager)
-                context.getSystemService(Context.ALARM_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            final int JOB_ID = 1;
 
-        if (isOn) {
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime(), POLL_INTERVAL, pi);
+            JobScheduler scheduler = (JobScheduler)
+                    context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
+            JobInfo jobInfo = new JobInfo.Builder(
+                    JOB_ID, new ComponentName(context, PollServiceLollipop.class))
+                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                    .setPeriodic(1000 * 60 * 1)
+                    .setPersisted(true)
+                    .build();
+            if (isOn) {
+                scheduler.schedule(jobInfo);
+            }else {
+                scheduler.cancel(JOB_ID);
+            }
+
         }else {
-            alarmManager.cancel(pi);
-            pi.cancel();
+
+            Intent i = PollService.newIntent(context);
+            PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
+
+            AlarmManager alarmManager = (AlarmManager)
+                    context.getSystemService(Context.ALARM_SERVICE);
+
+            if (isOn) {
+                alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
+                        SystemClock.elapsedRealtime(), POLL_INTERVAL, pi);
+            } else {
+                alarmManager.cancel(pi);
+                pi.cancel();
+            }
         }
     }
 
@@ -46,10 +71,26 @@ public class PollService extends IntentService {
     }
 
     public static boolean isServiceAlarmOn(Context context){
-        Intent i = PollService.newIntent(context);
-        PendingIntent pi = PendingIntent
-                .getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
-        return pi != null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            final int JOB_ID = 1;
+
+            JobScheduler scheduler = (JobScheduler)
+                    context.getSystemService(JOB_SCHEDULER_SERVICE);
+
+            boolean hasBeenScheduled = false;
+            for (JobInfo jobInfo: scheduler.getAllPendingJobs()){
+                if (jobInfo.getId() == JOB_ID) {
+                    hasBeenScheduled = true;
+                }
+            }
+
+            return hasBeenScheduled;
+        }else {
+            Intent i = PollService.newIntent(context);
+            PendingIntent pi = PendingIntent
+                    .getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
+            return pi != null;
+        }
     }
 
     @Override
