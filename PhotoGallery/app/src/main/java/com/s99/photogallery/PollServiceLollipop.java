@@ -96,6 +96,8 @@ public class PollServiceLollipop extends JobService {
                 NotificationManagerCompat notificationManager =
                         NotificationManagerCompat.from(PollServiceLollipop.this);
                 notificationManager.notify(0, notification);
+
+                sendBroadcast(new Intent(PollService.ACTION_SHOW_NOTIFICATION));
             }
 
             QueryPreferences.setLastResultId(PollServiceLollipop.this, resultId);
