@@ -1,6 +1,7 @@
 package com.s99.photogallery;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,12 +9,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
-public class PhotoPageFragment extends VisibleFragment{
+public class PhotoPageFragment extends VisibleFragment
+        implements PhotoPageActivity.BackPressHandler{
     private static final String ARG_URI = "photo_page_url";
 
     private Uri mUri;
@@ -68,12 +71,28 @@ public class PhotoPageFragment extends VisibleFragment{
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (!URLUtil.isHttpUrl(url) && !URLUtil.isHttpsUrl(url)) {
+                    Intent i = new Intent();
+                    i.setAction(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+
+                    return true;
+                }
                 return false;
             }
         });
         mWebView.loadUrl(mUri.toString());
 
         return view;
+    }
 
+    @Override
+    public boolean onBackPressed() {
+        if (mWebView.canGoBack()){
+            mWebView.goBack();
+            return true;
+        }
+        return false;
     }
 }
