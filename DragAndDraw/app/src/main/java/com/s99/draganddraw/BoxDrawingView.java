@@ -4,22 +4,26 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BoxDrawingView extends View {
 
-    public static final String TAG = "BoxDrawingView";
+    private static final String TAG = "BoxDrawingView";
+    private static final String BOXEN = "boxen";
+    private static final String SUPER_STATE = "super_state";
 
     private Box mCurrentBox;
-    private List<Box> mBoxen = new ArrayList<>();
+    private ArrayList<Box> mBoxen = new ArrayList<>();
     private Paint mBoxPaint;
     private Paint mBackgroundPaint;
+    private int mPointerId = -1;
 
     //Used when creating the view in code
     public BoxDrawingView(Context context) {
@@ -43,6 +47,26 @@ public class BoxDrawingView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         PointF current = new PointF(event.getX(), event.getY());
         String action = "";
+        int pointerIdx = event.getActionIndex();
+        int pointerId = event.getPointerId(pointerIdx);
+        PointF pointer = new PointF(event.getX(pointerIdx), event.getY(pointerIdx));
+
+        switch (event.getActionMasked()){
+            case MotionEvent.ACTION_POINTER_DOWN:
+                action = "ACTION_POINTER_DOWN id = " + pointerId;
+                Log.i(TAG, action);
+                if (mPointerId < 0) {
+                    mPointerId = pointerId;
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                action = "ACTION_POINTER_UP id = " + pointerId;
+                Log.i(TAG, action);
+                if (mPointerId == pointerId){
+                    mPointerId = -1;
+                }
+                break;
+        }
 
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
@@ -87,4 +111,20 @@ public class BoxDrawingView extends View {
             canvas.drawRect(left, top, right, bottom, mBoxPaint);
         }
     }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle savedState = new Bundle();
+        savedState.putParcelableArrayList(BOXEN, mBoxen);
+        savedState.putParcelable(SUPER_STATE, super.onSaveInstanceState());
+        return savedState;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Bundle savedState = (Bundle) state;
+        mBoxen = savedState.getParcelableArrayList(BOXEN);
+        super.onRestoreInstanceState(savedState.getParcelable(SUPER_STATE));
+    }
+
 }
