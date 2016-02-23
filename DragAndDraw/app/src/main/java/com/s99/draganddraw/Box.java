@@ -7,6 +7,8 @@ import android.os.Parcelable;
 public class Box implements Parcelable {
     private PointF mOrigin;
     private PointF mCurrent;
+    private PointF mPointerStart;
+    private PointF mPointerEnd;
 
     public Box(PointF origin){
         mCurrent = origin;
@@ -28,6 +30,22 @@ public class Box implements Parcelable {
 
     public void setCurrent(PointF current) {
         mCurrent = current;
+    }
+
+    public PointF getPointerStart() {
+        return mPointerStart;
+    }
+
+    public void setPointerStart(PointF pointerStart) {
+        mPointerStart = pointerStart;
+    }
+
+    public PointF getPointerEnd() {
+        return mPointerEnd;
+    }
+
+    public void setPointerEnd(PointF pointerEnd) {
+        mPointerEnd = pointerEnd;
     }
 
     @Override

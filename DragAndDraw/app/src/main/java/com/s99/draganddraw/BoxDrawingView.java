@@ -23,6 +23,7 @@ public class BoxDrawingView extends View {
     private ArrayList<Box> mBoxen = new ArrayList<>();
     private Paint mBoxPaint;
     private Paint mBackgroundPaint;
+    private Paint mTestPaint; //paint for test information
     private int mPointerId = -1;
 
     //Used when creating the view in code
@@ -41,6 +42,11 @@ public class BoxDrawingView extends View {
         //paint the background off-withe
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setColor(0xfff8efe0);
+
+        //test paint blue
+        mTestPaint = new Paint();
+        mTestPaint.setColor(0xff283593);
+        mTestPaint.setStrokeWidth(10);
     }
 
     @Override
@@ -49,14 +55,21 @@ public class BoxDrawingView extends View {
         String action = "";
         int pointerIdx = event.getActionIndex();
         int pointerId = event.getPointerId(pointerIdx);
+
+        if (mPointerId >= 0) {
+            pointerIdx = event.findPointerIndex(mPointerId);
+        }
+
         PointF pointer = new PointF(event.getX(pointerIdx), event.getY(pointerIdx));
 
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_POINTER_DOWN:
                 action = "ACTION_POINTER_DOWN id = " + pointerId;
                 Log.i(TAG, action);
-                if (mPointerId < 0) {
+                if (mPointerId < 0 && mCurrentBox != null) {
                     mPointerId = pointerId;
+                    mCurrentBox.setPointerStart(pointer);
+                    mCurrentBox.setPointerEnd(pointer);
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -80,15 +93,21 @@ public class BoxDrawingView extends View {
                 if (mCurrentBox != null){
                     mCurrentBox.setCurrent(current);
                     invalidate();
+
+                    if (mPointerId >= 0){
+                        mCurrentBox.setPointerEnd(pointer);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 action = "ACTION_UP";
                 mCurrentBox = null;
+                mPointerId = -1;
                 break;
             case MotionEvent.ACTION_CANCEL:
                 action = "ACTION_CANCEL";
                 mCurrentBox = null;
+                mPointerId = -1;
                 break;
         }
 
@@ -100,6 +119,7 @@ public class BoxDrawingView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         //fill the background
+
         canvas.drawPaint(mBackgroundPaint);
 
         for (Box box : mBoxen){
@@ -108,7 +128,44 @@ public class BoxDrawingView extends View {
             float top = Math.min(box.getCurrent().y, box.getOrigin().y);
             float bottom = Math.max(box.getCurrent().y, box.getOrigin().y);
 
-            canvas.drawRect(left, top, right, bottom, mBoxPaint);
+            PointF pivot = new PointF(
+                    (float)((left + right) * 0.5), (float)((top + bottom) * 0.5));
+
+            canvas.drawPoint(pivot.x, pivot.y, mTestPaint);
+
+            if ( box.getPointerEnd() != null && box.getPointerStart() != null) {
+
+                PointF pS = box.getPointerStart();
+                PointF pE = box.getPointerEnd();
+
+                canvas.drawPoint(pS.x, pS.y, mTestPaint);
+                canvas.drawPoint(pE.x, pE.y, mTestPaint);
+
+                double pivotPs = Math.abs(Math.sqrt(
+                        (pivot.x - pS.x) * (pivot.x - pS.x) + (pivot.y - pS.y) * (pivot.y - pS.y)));
+                double pivotPe = Math.abs(Math.sqrt(
+                        (pivot.x - pE.x) * (pivot.x - pE.x) + (pivot.y - pE.y) * (pivot.y - pE.y)));
+                double PePs = Math.abs(Math.sqrt(
+                        (pE.x - pS.x) * (pE.x - pS.x) + (pE.y - pS.y) * (pE.y - pS.y)));
+                double alfa =
+                        (pivotPs * pivotPs + pivotPe * pivotPe - PePs * PePs)
+                        / (2 * pivotPs * pivotPe);
+
+                alfa = Math.toDegrees(Math.acos(alfa));
+
+                canvas.drawText(String.valueOf(alfa), right, bottom, mTestPaint);
+
+                canvas.save();
+
+                canvas.rotate((float) alfa, pivot.x, pivot.y);
+
+                canvas.drawRect(left, top, right, bottom, mBoxPaint);
+
+                canvas.restore();
+
+            }else {
+                canvas.drawRect(left, top, right, bottom, mBoxPaint);
+            }
         }
     }
 
