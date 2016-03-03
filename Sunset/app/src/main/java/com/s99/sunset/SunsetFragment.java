@@ -12,12 +12,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.ImageView;
 
 public class SunsetFragment extends Fragment {
 
     private View mSceneView;
     private View mSunsetView;
     private View mSkyView;
+    private View mWaterView;
+
+    private ImageView mReflection;
 
     private int mBlueSkyColor;
     private int mSunsetSkyColor;
@@ -26,6 +30,7 @@ public class SunsetFragment extends Fragment {
     private int mCurrentNightColor = 0;
 
     private float mSunCurrentAnimatedPosition = -1;
+    private float mReflectionCurrenAnimatedPosition = -32000;
 
     private AnimatorSet mCurrentAnimatorSet;
 
@@ -43,6 +48,10 @@ public class SunsetFragment extends Fragment {
         mSceneView = view;
         mSkyView = view.findViewById(R.id.sky);
         mSunsetView = view.findViewById(R.id.sun);
+        mWaterView = view.findViewById(R.id.water);
+
+        mReflection = (ImageView) view.findViewById(R.id.reflection);
+        mReflection.setAlpha((float)0.2);
 
         Resources resources = getResources();
         mBlueSkyColor = resources.getColor(R.color.blue_sky);
@@ -64,9 +73,14 @@ public class SunsetFragment extends Fragment {
         float sunYStart = mSunsetView.getTop();
         final float sunYEnd = mSkyView.getHeight();
 
+        float reflectionYStart = mReflection.getTop();
+        float reflectionYEnd = mReflection.getHeight() * -1;
+
         if (mSunCurrentAnimatedPosition < 0) mSunCurrentAnimatedPosition = sunYStart;
         if (mCurrentColor == 0) mCurrentColor = mBlueSkyColor;
         if (mCurrentNightColor == 0) mCurrentNightColor = mSunsetSkyColor;
+        if (mReflectionCurrenAnimatedPosition != -32000)
+            reflectionYStart = mReflectionCurrenAnimatedPosition;
 
         //heatingTheSun
         float baseScale = 1;
@@ -92,6 +106,19 @@ public class SunsetFragment extends Fragment {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mSunCurrentAnimatedPosition = (float) animation.getAnimatedValue();
+            }
+        });
+
+        //reflection animation
+        final ObjectAnimator reflectionAnimator = ObjectAnimator
+                .ofFloat(mReflection, "y", reflectionYStart, reflectionYEnd)
+                .setDuration(3000);
+        reflectionAnimator.setInterpolator(new AccelerateInterpolator());
+
+        reflectionAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mReflectionCurrenAnimatedPosition = (float) animation.getAnimatedValue();
             }
         });
 
@@ -132,6 +159,7 @@ public class SunsetFragment extends Fragment {
                 .with(sunsetSkyAnimation)
                 .with(heatHAnimator)
                 .with(heatWAnimator)
+                .with(reflectionAnimator)
                 .before(nightSkyAnimator);
         mCurrentAnimatorSet.start();
 
@@ -142,9 +170,14 @@ public class SunsetFragment extends Fragment {
         float sunYStart = mSunsetView.getTop();
         float sunYEnd = mSkyView.getHeight();
 
+        float reflectionYStart = mReflection.getTop();
+        float reflectionYEnd = mReflection.getHeight() * -1;
+
         if (mSunCurrentAnimatedPosition < 0) mSunCurrentAnimatedPosition = sunYEnd;
         if (mCurrentColor == 0) mCurrentColor = mSunsetSkyColor;
         if (mCurrentNightColor == 0) mCurrentNightColor = mNightSkyColor;
+        if (mReflectionCurrenAnimatedPosition != -32000)
+            reflectionYEnd = mReflectionCurrenAnimatedPosition;
 
         //heatingTheSun
         float baseScale = 1;
@@ -170,6 +203,19 @@ public class SunsetFragment extends Fragment {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mSunCurrentAnimatedPosition = (float) animation.getAnimatedValue();
+            }
+        });
+
+        //reflection animation
+        final ObjectAnimator reflectionAnimator = ObjectAnimator
+                .ofFloat(mReflection, "y", reflectionYEnd, reflectionYStart)
+                .setDuration(3000);
+        reflectionAnimator.setInterpolator(new AccelerateInterpolator());
+
+        reflectionAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mReflectionCurrenAnimatedPosition = (float) animation.getAnimatedValue();
             }
         });
 
@@ -215,11 +261,15 @@ public class SunsetFragment extends Fragment {
                     .with(sunsetSkyAnimation)
                     .with(heatHAnimator)
                     .with(heatWAnimator)
+                    .with(reflectionAnimator)
                     .after(nightSkyAnimator);
         }else {
             mCurrentAnimatorSet
                     .play(heightAnimator)
-                    .with(sunsetSkyAnimation);
+                    .with(sunsetSkyAnimation)
+                    .with(heatHAnimator)
+                    .with(heatWAnimator)
+                    .with(reflectionAnimator);
         }
 
         mCurrentAnimatorSet.start();
