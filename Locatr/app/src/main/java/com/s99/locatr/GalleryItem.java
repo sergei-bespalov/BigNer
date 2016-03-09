@@ -6,6 +6,8 @@ public class GalleryItem {
     private String mCaption;
     private String mId;
     private String mUrl;
+    private double mLat;
+    private double mLot;
     private String mOwner;
 
     public String getCaption() {
@@ -30,6 +32,22 @@ public class GalleryItem {
 
     public void setUrl(String url) {
         mUrl = url;
+    }
+
+    public double getLat() {
+        return mLat;
+    }
+
+    public void setLat(double lat) {
+        mLat = lat;
+    }
+
+    public double getLot() {
+        return mLot;
+    }
+
+    public void setLot(double lot) {
+        mLot = lot;
     }
 
     public String getOwner() {
