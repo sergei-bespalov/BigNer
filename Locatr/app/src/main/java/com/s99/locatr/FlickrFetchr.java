@@ -1,5 +1,6 @@
 package com.s99.locatr;
 
+import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
 
@@ -26,7 +27,7 @@ public class FlickrFetchr {
     private static final String API_KEY = "03301b9a7cfb5dd7ad658b2fe9f9847a";
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
-    private static  Uri mEndpoint = Uri
+    private static  Uri ENDPOINT = Uri
             .parse("https://api.flickr.com/services/rest/")
             .buildUpon()
             .appendQueryParameter("api_key", API_KEY)
@@ -93,13 +94,13 @@ public class FlickrFetchr {
     }
 
     public static void setPage(int pageNumber){
-        mEndpoint = mEndpoint.buildUpon()
+        ENDPOINT = ENDPOINT.buildUpon()
                 .appendQueryParameter("page", String.valueOf(pageNumber))
                 .build();
     }
 
     private String buildUrl(String method, String query){
-        Uri.Builder uriBuilder = mEndpoint.buildUpon()
+        Uri.Builder uriBuilder = ENDPOINT.buildUpon()
                 .appendQueryParameter("method", method);
 
         if (method.equals(SEARCH_METHOD)){
@@ -109,6 +110,14 @@ public class FlickrFetchr {
         return uriBuilder.build().toString();
     }
 
+    private String buildUrl(Location location) {
+        return ENDPOINT.buildUpon()
+                .appendQueryParameter("method", SEARCH_METHOD)
+                .appendQueryParameter("lat", "" + location.getLatitude())
+                .appendQueryParameter("lon", "" + location.getLongitude())
+                .build().toString();
+    }
+
     public List<GalleryItem> fetchRecentPhotos(){
         String url = buildUrl(FETCH_RECENTS_METHOD, null);
         return downloadGalleryItems(url);
@@ -116,6 +125,11 @@ public class FlickrFetchr {
 
     public List<GalleryItem> searchPhotos(String query){
         String url = buildUrl(SEARCH_METHOD, query);
+        return downloadGalleryItems(url);
+    }
+
+    public List<GalleryItem> searchPhotos(Location location){
+        String url = buildUrl(location);
         return downloadGalleryItems(url);
     }
 
